@@ -1,7 +1,7 @@
 from entity import Entity
 
 
-# Removed the constructor to work with the parent one and changed every self.conn to self.db
+# Removed the constructor to work with the parent attribute and changed every self.conn to self.db
 class Department(Entity):
     # def __init__(self, db):
     #     self.conn = db.connect()
@@ -23,12 +23,14 @@ class Department(Entity):
         cursor.close()
 
     def update_department(self, dno):
+        # Search first on the id, if not found return and the same goes for delete and search
         cursor = self.db.cursor(dictionary=True)
         cursor.execute("SELECT * FROM departments where Dno = %s", (dno,))
         course = cursor.fetchone()
         if not course:
             print(f"Can't find a departments with id {dno}")
             return
+
         print("Updating on department", dno)
         newName = input("Enter the new name: ")
         cursor.execute(
@@ -45,6 +47,7 @@ class Department(Entity):
         if not course:
             print(f"Can't find a departments with id {dno}")
             return
+
         cursor.execute("DELETE FROM departments WHERE Dno = %s", (dno,))
         self.db.commit()
         print("Department deleted successfully")

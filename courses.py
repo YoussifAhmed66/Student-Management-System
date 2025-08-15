@@ -34,6 +34,7 @@ class Course(Entity):
             print(f"Can't find a course with number {cno}")
             return
         print(f"Updating on the course {course['Name']}")
+        # A simple GUI for the user to choose what to update
         while True:
             print("please choose what to edit")
             print("1: Name")

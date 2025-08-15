@@ -29,6 +29,7 @@ class Student(Entity):
         cursor.close()
 
     def update_student(self, id):
+        # search for the id , if not found return
         cursor = self.db.cursor(dictionary=True)
         cursor.execute("SELECT * FROM students where Sid = %s", (id,))
         student = cursor.fetchone()
@@ -38,7 +39,8 @@ class Student(Entity):
         print(
             f"Updating on the student {student['Fname']} {student['Mname']} {student['Lname']}"
         )
-        # cursor.close()
+
+        # having a simple GUI for the user to choose what to update
         while True:
             print("please choose what to edit")
             print("1: Name")
@@ -51,6 +53,7 @@ class Student(Entity):
                 "Enter the value corresponding to the field you want to change: "
             )
             if choice == "1":
+                # here the user enters the full name (e.g: Youssif Ahmed Abdallah) and the first, second and third names are extracted and updated in the database
                 new = input("Please enter the full name of the student: ")
                 new = new.split(" ")
                 cursor.execute(
