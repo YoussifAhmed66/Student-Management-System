@@ -3,10 +3,10 @@ from mysql.connector import errorcode  # shortcut for error handeling module
 
 # importing entity classes
 from database import Database
-from entity import Entity
-from departments import Department
-from students import Student
-from courses import Course
+from Entities.entity import Entity
+from Entities.departments import Department
+from Entities.students import Student
+from Entities.courses import Course
 import validation
 
 
