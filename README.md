@@ -28,8 +28,8 @@ This is a simple command-line student management system built with Python and My
 ## Installation
 1. Clone the repository:
 ``` bash
-git clone https://github.com/your-username/student-management-system.git
-cd student-management-system
+git clone https://github.com/YoussifAhmed66/Student-Management-System
+cd Student-Management-System
 ```
 2. Install the required Python library:
 ``` bash
