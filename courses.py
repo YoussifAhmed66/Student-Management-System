@@ -17,13 +17,13 @@ class Course(Entity):
         cursor.execute(
             "SELECT c.*, d.Name AS DName FROM courses AS c LEFT JOIN departments AS d ON c.Dno = d.Dno"
         )
-        print("Here are all the courses:")
+        print("\nHere are all the courses:")
         for row in cursor:
+            print("-----------------------------")
             print(f"Id: {row['Cno']}")
             print(f"Name: {row['Name']}")
             print(f"Capacity: {row['Capacity']}")
             print(f"Department: {row['DName']}")
-            print("-----------------------------")
         cursor.close()
 
     def update_course(self, cno):
@@ -90,6 +90,7 @@ class Course(Entity):
         if not row:
             print(f"Can't find a course with number {cno}")
             return
+        print("")
         print(f"Course name: {row['Name']}")
         print(f"Department: {row['Dno']} ")
         print(f"Created at: {row['Created_at']} ")

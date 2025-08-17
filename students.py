@@ -1,4 +1,5 @@
 from entity import Entity
+import validation
 
 
 class Student(Entity):
@@ -17,15 +18,15 @@ class Student(Entity):
         cursor.execute(
             "SELECT s.*, d.Name AS DName FROM students AS s LEFT JOIN departments AS d ON s.Dno = d.Dno"
         )
-        print("Here are all the students:")
+        print("\nHere are all the students:")
         for row in cursor:
+            print("-----------------------------")
             print(f"Id: {row['Sid']}")
             print(f"Name: {row['Fname']} {row['Mname']} {row['Lname']}")
             print(f"Email: {row['Email']}")
             print(f"Phone: {row['Phone']}")
             print(f"Address: {row['Address']}")
             print(f"Department: {row['DName']}")
-            print("-----------------------------")
         cursor.close()
 
     def update_student(self, id):
@@ -62,13 +63,13 @@ class Student(Entity):
                 )
                 self.db.commit()
             elif choice == "2":
-                new = input("Enter the new email: ")
+                new = validation.validate_email("Enter the new email: ")
                 cursor.execute(
                     "UPDATE students SET Email = %s where Sid = %s ", (new, id)
                 )
                 self.db.commit()
             elif choice == "3":
-                new = input("Enter the new phone: ")
+                new = validation.validate_phone("Enter the new phone: ")
                 cursor.execute(
                     "UPDATE students SET Phone = %s where Sid = %s ", (new, id)
                 )
@@ -80,7 +81,7 @@ class Student(Entity):
                 )
                 self.db.commit()
             elif choice == "5":
-                new = input("Enter the new department Id of the student: ")
+                new = input("Enter the new department no. of the student: ")
                 cursor.execute(
                     "UPDATE students SET Dno = %s where Sid = %s ", (new, id)
                 )
@@ -112,6 +113,7 @@ class Student(Entity):
         if not row:
             print(f"Can't find a student with id {id}")
             return
+        print("")
         print(f"Name: {row['Fname']} {row['Mname']} {row['Lname']}")
         print(f"Email: {row['Email']} ")
         print(f"Phone: {row['Phone']} ")

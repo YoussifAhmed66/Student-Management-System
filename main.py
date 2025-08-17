@@ -2,62 +2,12 @@ import mysql.connector
 from mysql.connector import errorcode  # shortcut for error handeling module
 
 # importing entity classes
+from database import Database
 from entity import Entity
 from departments import Department
 from students import Student
 from courses import Course
-
-
-# This is the database cennection class which connects to the database if exists and if not it creates a new one and import it's structure from schema.sql
-# Then it return a connection object
-class Database:
-    def connect(self):
-        try:
-            conn = mysql.connector.connect(
-                host="localhost",
-                user="root",
-                password="",
-                database="Student_Management_System",
-            )
-            return conn
-        # if the connection to the database failed because of unkown database it creates a new database but if it was for any other reason like username, password, etc... it raises the error
-        except mysql.connector.Error as error:
-            if (
-                error.errno == errorcode.ER_BAD_DB_ERROR
-            ):  # constant value with integer error number for unkown database: 1049
-                print("Creating Database")
-                self.create_database()
-                self.import_schema()
-                return self.connect()  # connect aain after the database was created
-            else:
-                raise  # more error handeling will be added soon
-
-    # A Method to create a new database
-    def create_database(self):
-        conn = mysql.connector.connect(host="localhost", user="root", password="")
-        cursor = conn.cursor()
-        cursor.execute("CREATE DATABASE Student_Management_System")
-        print("Database Student_Management_System created successfuly")
-        cursor.close()
-        conn.close()
-
-    # A method to import the tables structure to the new database created
-    def import_schema(self):
-        conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="",
-            database="Student_Management_System",
-        )
-        cursor = conn.cursor()
-        # it reads schema.sql file then execute each statement individually by splitting them at ';' and looping through them
-        with open("schema.sql", "r") as file:
-            schema = file.read()
-
-        for statement in schema.split(";"):
-            cursor.execute(statement.strip())
-        conn.commit()
-        cursor.close()
+import validation
 
 
 # Main
@@ -66,36 +16,192 @@ class Database:
 db = Database().connect()
 Entity.db = db
 
-# Just testing the methods of the classes
+# A simple CLI to navigate through methods
+# When the user choose a category an instance of the coresponding class is created to manage it
+print("Welcome to student manager")
+print("==========================================")
+while True:
+    print("There are the categories we have")
+    print("1: Students")
+    print("2: departments")
+    print("3: Courses")
+    print("0: Exit")
+    choice = input("Enter the number of the category you want to manage: ")
+    print("==========================================\n")
+    if choice == "1":
+        # creating an instance from Student class and show the options for it
+        students = Student()
+        while True:
+            print("Please choose what you want")
+            print("1: Show all students")
+            print("2: Add a student")
+            print("3: Update a student")
+            print("4: Delete a student")
+            print("5: Search for a student")
+            print("0: Back")
+            sub_choice = input("Enter what you want to do: ")
+            if sub_choice == "1":
+                students.show_students()
 
-departments = Department()
-# departments.add_department("Physics")
-# departments.show_departments()
-# departments.update_department(11)
-# departments.delete_departments(1000)
-# departments.search_department(11)
+            elif sub_choice == "2":
+                # inserting the student data using the validation functions from the validation module
+                print("\nInserting new student")
+                fname = validation.validate_name("Enter the first name: ")
+                mname = validation.validate_name("Enter the middle name: ")
+                lname = validation.validate_name("Enter the last name: ")
+                email = validation.validate_email("Enter the email of the student: ")
+                phone = validation.validate_phone(
+                    "Enter the phone number of the student: "
+                )
+                address = input("Enter the address of the student: ")
+                dno = input("Enter the department number of the student: ")
 
+                # Adding the data in student table while checking if the eamail or phone are duplicated in the students table and if the department no doesn't exist to avoid errors
+                try:
+                    students.add_student(
+                        fname, mname, lname, email, phone, address, dno
+                    )
+                except mysql.connector.Error as error:
+                    validation.handle_db_error(error)
 
-students = Student()
-# students.add_student(
-#     "Youssif",
-#     "Ahmed",
-#     "Abdallah",
-#     "yoossifahmed66@gmail.com",
-#     "01143095568",
-#     "Giza",
-#     11,
-# )
+            elif sub_choice == "3":
+                id = validation.validate_integer(
+                    "Enter the id of the student you wnat to update: "
+                )
+                try:
+                    students.update_student(id)
+                except mysql.connector.Error as error:
+                    validation.handle_db_error(error)
 
-# students.show_students()
-# students.update_student(1008)
-# students.delete_student(1002)
-# students.search_student(1002)
+            elif sub_choice == "4":
+                id = validation.validate_integer(
+                    "Enter the id of the student you wnat to delete: "
+                )
+                students.delete_student(id)
 
+            elif sub_choice == "5":
+                id = validation.validate_integer(
+                    "Enter the id of the student you wnat to search for: "
+                )
+                students.search_student(id)
 
-course = Course()
-# course.add_course("Abstract Algebra", 100, 11)
-# course.show_courses()
-# course.update_course(2)
-# course.delete_course(2)
-course.search_course(3)
+            elif sub_choice == "0":
+                break
+            else:
+                print("Please enter a valid input")
+            print("-----------------------------------\n")
+
+    elif choice == "2":
+        # creating an instance from department class and show the options for it
+        departments = Department()
+        while True:
+            print("Please choose what you want")
+            print("1: Show all departments")
+            print("2: Add a department")
+            print("3: Update a department")
+            print("4: Delete a department")
+            print("5: Search for a department")
+            print("0: Back")
+            sub_choice = input("Enter what you want to do: ")
+            if sub_choice == "1":
+                departments.show_departments()
+
+            elif sub_choice == "2":
+                print("\nInserting new department")
+                name = validation.validate_name("Enter the name of the department: ")
+                try:
+                    departments.add_department(name)
+                except mysql.connector.Error as error:
+                    validation.handle_db_error(error)
+
+            elif sub_choice == "3":
+                id = validation.validate_integer(
+                    "Enter the number of the department to update: "
+                )
+                try:
+                    departments.update_department(id)
+                except mysql.connector.Error as error:
+                    validation.handle_db_error(error)
+
+            elif sub_choice == "4":
+                id = validation.validate_integer(
+                    "Enter the department number you want to delete: "
+                )
+                departments.delete_department(id)
+
+            elif sub_choice == "5":
+                id = validation.validate_integer(
+                    "Enter the department number you want to search for: "
+                )
+                departments.search_department(id)
+
+            elif sub_choice == "0":
+                break
+            else:
+                print("Please enter a valid input")
+            print("-----------------------------------\n")
+
+    elif choice == "3":
+        courses = Course()
+        while True:
+            print("Please choose what you want")
+            print("1: Show all courses")
+            print("2: Add a course")
+            print("3: Update a course")
+            print("4: Delete a course")
+            print("5: Search for a course")
+            print("0: Back")
+            sub_choice = input("Enter what you want to do: ")
+            if sub_choice == "1":
+                courses.show_courses()
+
+            elif sub_choice == "2":
+                print("\nInserting new course")
+                # the course name doesn't apply normal validation because some names may contain numbers or special characters
+                name = input("Enter the name of the course: ")
+                capacity = validation.validate_integer(
+                    "Enter the capacity of the course: "
+                )
+                dno = input(
+                    "Enter the number of the department which is responsible for this course: "
+                )
+
+                try:
+                    courses.add_course(name, capacity, dno)
+                except mysql.connector.Error as error:
+                    validation.handle_db_error(error)
+
+            elif sub_choice == "3":
+                id = validation.validate_integer(
+                    "Enter the number of the course you want to update: "
+                )
+                try:
+                    courses.update_course(id)
+                except mysql.connector.Error as error:
+                    validation.handle_db_error(error)
+
+            elif sub_choice == "4":
+                id = validation.validate_integer(
+                    "enter the number of the course you want to delete: "
+                )
+                courses.delete_course(id)
+
+            elif sub_choice == "5":
+                id = validation.validate_integer(
+                    "enter the number of the course you want to search for: "
+                )
+                courses.search_course(id)
+
+            elif sub_choice == "0":
+                break
+            else:
+                print("Please enter a valid input")
+            print("-----------------------------------\n")
+
+    elif choice == "0":
+        print("Thank you, good bye")
+        break
+    else:
+        print("Please enter a valid input")
+
+    print("==========================================\n")
